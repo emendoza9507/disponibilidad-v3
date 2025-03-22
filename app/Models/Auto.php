@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
+
 class Auto extends Model
 {
     //
@@ -30,6 +32,11 @@ class Auto extends Model
             'ESTADO',
             'CODIGO'
         );
+    }
+
+    public function scopeIsActivo(Builder $query)
+    {
+        return $query->where('FECHABAJA', null);
     }
 
     public static function columnFilamentTableEstadoVehiculo() {

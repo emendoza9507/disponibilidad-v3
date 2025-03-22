@@ -4,11 +4,13 @@ namespace App\Filament\Taller\Resources;
 
 use App\Filament\Taller\Resources\OrdenTrabajoResource\Pages;
 use App\Filament\Taller\Resources\OrdenTrabajoResource\RelationManagers;
+use App\Models\Auto;
 use App\Models\OrdenTrabajo;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -38,10 +40,6 @@ class OrdenTrabajoResource extends Resource
                     ->numeric(),
                 Forms\Components\TextInput::make('CONDUCTOR')
                     ->numeric(),
-                Forms\Components\TextInput::make('TIPOSERVICIO')
-                    ->numeric(),
-                Forms\Components\TextInput::make('IMPORTESERVICIO')
-                    ->numeric(),
                 Forms\Components\TextInput::make('RECEPCIONISTA')
                     ->numeric(),
                 Forms\Components\TextInput::make('DEPOSITOENTRADA')
@@ -50,57 +48,14 @@ class OrdenTrabajoResource extends Resource
                     ->numeric(),
                 Forms\Components\TextInput::make('ESTADO')
                     ->numeric(),
-                Forms\Components\TextInput::make('DESCRIPCION')
-                    ->maxLength(500),
                 Forms\Components\TextInput::make('DIAGNOSTICO')
                     ->maxLength(8000),
                 Forms\Components\TextInput::make('DEPARTAMENTO')
                     ->maxLength(20),
                 Forms\Components\DateTimePicker::make('FECHACIERRE'),
-                Forms\Components\TextInput::make('CONDUCTORSALIDA')
-                    ->numeric(),
-                Forms\Components\TextInput::make('SERVICIO')
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('TIPO')
-                    ->numeric(),
-                Forms\Components\TextInput::make('AGENCIASALIDA')
-                    ->maxLength(8),
-                Forms\Components\TextInput::make('CONDUCTORENTREGA')
-                    ->maxLength(40),
-                Forms\Components\TextInput::make('CONDUCTORCLIENTE')
-                    ->maxLength(40),
-                Forms\Components\TextInput::make('REPUESTOPENDIENTE')
-                    ->maxLength(100),
                 Forms\Components\TextInput::make('observaciones')
                     ->maxLength(254),
-                Forms\Components\TextInput::make('kmsalida')
-                    ->numeric(),
-                Forms\Components\TextInput::make('diasrep')
-                    ->numeric(),
-                Forms\Components\TextInput::make('diasterm')
-                    ->numeric(),
                 Forms\Components\TextInput::make('CIERREFACTURA')
-                    ->numeric(),
-                Forms\Components\DateTimePicker::make('FINCHAPA'),
-                Forms\Components\DateTimePicker::make('FINPINTURA'),
-                Forms\Components\TextInput::make('DEPCOSTO')
-                    ->maxLength(20),
-                Forms\Components\DateTimePicker::make('FECHATASACION'),
-                Forms\Components\TextInput::make('DIVISION')
-                    ->maxLength(8),
-                Forms\Components\TextInput::make('INCREMENTO')
-                    ->numeric(),
-                Forms\Components\TextInput::make('INCREMENTOREC')
-                    ->numeric(),
-                Forms\Components\TextInput::make('MANOOBRAMN')
-                    ->numeric(),
-                Forms\Components\TextInput::make('INCREMENTOMN')
-                    ->numeric(),
-                Forms\Components\TextInput::make('INCREMENTORECMN')
-                    ->numeric(),
-                Forms\Components\TextInput::make('IMPORTESERVICIOMN')
-                    ->numeric(),
-                Forms\Components\TextInput::make('CODIGOOF')
                     ->numeric(),
                 Forms\Components\TextInput::make('CIERRE')
                     ->numeric(),
@@ -108,55 +63,9 @@ class OrdenTrabajoResource extends Resource
                     ->maxLength(8),
                 Forms\Components\TextInput::make('USUARIO_CIERRE')
                     ->maxLength(20),
-                Forms\Components\TextInput::make('NOMBREENTREGA')
-                    ->maxLength(40),
-                Forms\Components\TextInput::make('DIRECCIONENTREGA')
-                    ->maxLength(60),
-                Forms\Components\TextInput::make('TELEFONOENTREGA')
-                    ->maxLength(40),
-                Forms\Components\TextInput::make('LICENCIAENTREGA')
-                    ->maxLength(40),
-                Forms\Components\TextInput::make('COPIAS')
-                    ->numeric(),
                 Forms\Components\TextInput::make('Prisma')
                     ->required()
                     ->maxLength(50),
-                Forms\Components\DateTimePicker::make('FECHAGARANTIA'),
-                Forms\Components\TextInput::make('TipoOT')
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('PREFERENCIA')
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('TipoAveria')
-                    ->numeric(),
-                Forms\Components\TextInput::make('EspecTecnicaTaller')
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('Componente')
-                    ->required()
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('Generada')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('Concepto')
-                    ->required()
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('Origen')
-                    ->required()
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('CODIGOOTRef')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('TIEMPO')
-                    ->numeric(),
-                Forms\Components\TextInput::make('SubTipoOT')
-                    ->required()
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('ElaboraSOLOT')
-                    ->numeric(),
-                Forms\Components\TextInput::make('UbicacionT')
-                    ->required()
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('COSTOINDIRECTO')
-                    ->numeric(),
             ]);
     }
 
@@ -224,7 +133,19 @@ class OrdenTrabajoResource extends Resource
             ])
             ->filters([
                 //
-            ])
+                Tables\Filters\SelectFilter::make('CODIGOTALLER')
+                    ->label('Taller')
+                    ->options([
+                        'JOSEF' => 'JOSEFINA',
+                        'PASEO' => 'PASEO',
+                        'ACOS' => 'PRIMELLES'
+                    ]),
+                Tables\Filters\SelectFilter::make('MATRICULA')
+                    ->label('MATRICULA')
+                    ->options(fn() => Auto::isActivo()->where('MATRICULA', '<>' ,null)->pluck('MATRICULA', 'MATRICULA'))
+                    ->preload()
+                    ->searchable()
+            ], FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -239,6 +160,7 @@ class OrdenTrabajoResource extends Resource
     {
         return [
             //
+            RelationManagers\ManoObrasRelationManager::class
         ];
     }
 

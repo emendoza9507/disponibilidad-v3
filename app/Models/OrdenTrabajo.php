@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrdenTrabajo extends Model
 {
@@ -25,5 +26,10 @@ class OrdenTrabajo extends Model
     public function auto(): BelongsTo
     {
         return $this->belongsTo(Auto::class, 'CODIGOM', 'CODIGOM');
+    }
+
+    public function manoObras(): HasMany
+    {
+        return $this->hasMany(ManoObra::class, 'CODIGOOT', 'CODIGOOT');
     }
 }
